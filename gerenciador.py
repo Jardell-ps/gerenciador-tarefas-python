@@ -72,9 +72,9 @@ carregar_tarefas()
 while True:
     print("\n1. Adicionar Tarefa")
     print("2. Ver Tarefas")
-    print("3. Sair")
-    print("4. Concluir Tarefa")
-    print("5. Deletar Tarefa")
+    print("3. Concluir Tarefa")
+    print("4. Deletar Tarefa")
+    print("5. Sair")
     
     opcao = input("\nEscolha uma opção: ")
 
@@ -85,24 +85,24 @@ while True:
     elif opcao == "2":
         ver_tarefas()
        
+    # ... (nos seus ifs)
     elif opcao == "3":
-        print("Saindo do gerenciador... Até logo!")
-        break
-    
-# ... (nos seus ifs)
-    elif opcao == "4":
         ver_tarefas() # Mostramos a lista para o usuário ver o número
         num = int(input("Digite o número da tarefa que deseja concluir: "))
         concluir_tarefa(num)
         salvar_tarefas() # Salva a alteração no JSON
 
 # ... (nos seus ifs)
-    elif opcao == "5":
+    elif opcao == "4":
         ver_tarefas() # Sempre bom mostrar a lista antes de deletar
         if tarefas: # Só pede o número se a lista não estiver vazia
             num = int(input("Digite o número da tarefa que deseja REMOVER: "))
             deletar_tarefa(num)
             salvar_tarefas() # Salva a remoção no JSON
+
+     elif opcao == "5":
+        print("Saindo do gerenciador... Até logo!")
+        break
 
     else:
         print("Opção inválida! Tente novamente.")
