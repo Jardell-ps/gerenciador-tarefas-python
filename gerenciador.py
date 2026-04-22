@@ -42,12 +42,39 @@ def carregar_tarefas():
         # Se o arquivo não existir ainda, começamos com a lista vazia
         tarefas = []
 
+def concluir_tarefa(indice):
+    try:
+        # Ajustamos o índice porque o usuário vê começando de 1, mas a lista começa de 0
+        ajuste_indice = indice - 1
+        if 0 <= ajuste_indice < len(tarefas):
+            tarefas[ajuste_indice]["concluida"] = True
+            print(f"Tarefa {indice} marcada como concluída!")
+        else:
+            print("Número de tarefa inválido.")
+    except ValueError:
+        print("Por favor, digite um número válido.")
+
+def deletar_tarefa(indice):
+    try:
+        ajuste_indice = indice - 1
+        if 0 <= ajuste_indice < len(tarefas):
+            # O .pop remove o item e podemos guardar o nome para confirmar
+            tarefa_removida = tarefas.pop(ajuste_indice)
+            print(f"Tarefa '{tarefa_removida['tarefa']}' removida com sucesso!")
+        else:
+            print("Número de tarefa inválido.")
+    except ValueError:
+        print("Por favor, digite um número válido.")
+
+
 carregar_tarefas()
 # --- MENU INTERATIVO ---
 while True:
     print("\n1. Adicionar Tarefa")
     print("2. Ver Tarefas")
     print("3. Sair")
+    print("4. Concluir Tarefa")
+    print("5. Deletar Tarefa")
     
     opcao = input("\nEscolha uma opção: ")
 
@@ -61,6 +88,21 @@ while True:
     elif opcao == "3":
         print("Saindo do gerenciador... Até logo!")
         break
+    
+# ... (nos seus ifs)
+    elif opcao == "4":
+        ver_tarefas() # Mostramos a lista para o usuário ver o número
+        num = int(input("Digite o número da tarefa que deseja concluir: "))
+        concluir_tarefa(num)
+        salvar_tarefas() # Salva a alteração no JSON
+
+# ... (nos seus ifs)
+    elif opcao == "5":
+        ver_tarefas() # Sempre bom mostrar a lista antes de deletar
+        if tarefas: # Só pede o número se a lista não estiver vazia
+            num = int(input("Digite o número da tarefa que deseja REMOVER: "))
+            deletar_tarefa(num)
+            salvar_tarefas() # Salva a remoção no JSON
+
     else:
         print("Opção inválida! Tente novamente.")
-
