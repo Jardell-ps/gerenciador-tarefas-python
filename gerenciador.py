@@ -1,6 +1,11 @@
 import json
 import uuid # Para criar IDs únicos e universais
 from datetime import datetime # Para lidar com datas
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv() # Isso carrega as variáveis do arquivo .env
 
 # Nossa "base de dados" temporária (lista)
 tarefas = []
@@ -57,7 +62,11 @@ def concluir_tarefa(id_procurado):
         if tarefa.get("id") == id_procurado:
             tarefa["concluida"] = True
             print(f"✅ Tarefa {id_procurado} marcada como concluída!")
-            return # Sai da função assim que encontra
+            
+            # AQUI ENTRA A INTEGRAÇÃO!
+            enviar_para_slack(tarefa['tarefa'], tarefa['prioridade'])
+            
+            return
     print("❌ Erro: ID não encontrado.")
 
 
@@ -73,6 +82,52 @@ def deletar_tarefa(id_procurado):
     else:
         print("❌ Erro: ID não encontrado.")
 
+def enviar_para_slack(nome_tarefa, prioridade):
+    # Substitua pela sua URL real do Slack quando tiver uma
+    url_webhook = os.getenv("SLACK_WEBHOOK_URL")
+    
+    # Vamos simplificar a mensagem para teste
+    payload = {"text": f"Nova tarefa concluída: {nome_tarefa}"}
+    
+    headers = {'Content-type': 'application/json'}
+    
+    try:
+        # Adicionamos o 'headers' para o Slack saber que é um JSON oficial
+        response = requests.post(url_webhook, json=payload, headers=headers)
+        print(f"Status do Slack: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Erro: {e}")
+
+def enviar_relatorio_slack():
+    if not tarefas:
+        print("⚠️ Não há tarefas para gerar relatório.")
+        return
+
+    # Construindo o cabeçalho do relatório
+    texto_relatorio = "📊 *RELATÓRIO GERAL DE TAREFAS*\n"
+    texto_relatorio += "------------------------------------------\n"
+
+    for t in tarefas:
+        status = "✅" if t.get("concluida") else "⏳"
+        texto_relatorio += f"{status} *{t['tarefa']}* | Prioridade: {t['prioridade']} | ID: `{t['id']}`\n"
+
+    texto_relatorio += "------------------------------------------\n"
+    texto_relatorio += f"Total de tarefas: {len(tarefas)}"
+
+    # Reutilizando a lógica de envio que você já tem
+    url_webhook = os.getenv("SLACK_WEBHOOK_URL")
+    payload = {"text": texto_relatorio}
+    
+    try:
+        response = requests.post(url_webhook, json=payload)
+        if response.status_code == 200:
+            print("🚀 Relatório completo enviado para o Slack!")
+        else:
+            print(f"⚠️ Erro ao enviar relatório: {response.status_code}")
+    except Exception as e:
+        print(f"⚠️ Erro de conexão: {e}")
+
+
 
 carregar_tarefas()
 # --- MENU INTERATIVO ---
@@ -82,7 +137,7 @@ while True:
     print("3. Concluir Tarefa")
     print("4. Deletar Tarefa")
     print("5. Sair")
-    
+    print("6. Enviar Relatório para o Slack")
     opcao = input("\nEscolha uma opção: ")
 
     if opcao == "1":
@@ -110,6 +165,9 @@ while True:
     elif opcao == "5":
         print("Saindo do gerenciador... Até logo!")
         break
+    
+    elif opcao == "6":
+        enviar_relatorio_slack()
 
     else:
         print("Opção inválida! Tente novamente.")

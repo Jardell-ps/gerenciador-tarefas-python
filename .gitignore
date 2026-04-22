@@ -1,3 +1,4 @@
+.env
 tarefas.json
 __pycache__/
 *.pyc
